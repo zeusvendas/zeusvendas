@@ -1,4 +1,4 @@
-name: Remover logo grande do hero
+name: Melhorar quadro do hero
 
 on:
   push:
@@ -16,27 +16,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Remover somente a logo grande
+      - name: Melhorar apenas a area direita do hero
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          old = '<div class="logo-card"><img src="logo-zeusvendas.webp" alt="Logo ZEUSVENDAS"></div>'
-          new = '<div class="logo-card"><div style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px" aria-hidden="true"></div></div>'
-          if s.count(old) != 1:
-              raise SystemExit(f'Esperava 1 logo grande, encontrei {s.count(old)}')
-          s = s.replace(old, new, 1)
+
+          old_css = '.logo-card{border:1px solid var(--line);background:linear-gradient(145deg,#0a0a0a,#141414);border-radius:28px;padding:16px;box-shadow:var(--shadow)}.logo-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:20px}'
+          new_css = '.logo-card{border:1px solid var(--line);background:linear-gradient(145deg,#0a0a0a,#141414);border-radius:28px;padding:16px;box-shadow:var(--shadow)}.hero-art{position:relative;display:block;width:100%;aspect-ratio:1/1;border-radius:20px;overflow:hidden;background:radial-gradient(circle at 18% 18%,rgba(255,36,63,.18),transparent 25%),radial-gradient(circle at 82% 24%,rgba(216,0,141,.18),transparent 24%),radial-gradient(circle at 50% 82%,rgba(255,255,255,.05),transparent 26%),linear-gradient(145deg,#0a0a0a,#121212)}.hero-art::before{content:"";position:absolute;inset:13%;border-radius:26px;border:1px solid rgba(255,255,255,.055)}.hero-art::after{content:"";position:absolute;left:10%;right:10%;bottom:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)}.hero-art .orb{position:absolute;border-radius:999px;filter:blur(2px)}.hero-art .orb-1{width:155px;height:155px;left:-34px;top:34px;background:radial-gradient(circle,rgba(255,36,63,.30),rgba(255,36,63,0) 68%)}.hero-art .orb-2{width:180px;height:180px;right:-45px;top:62px;background:radial-gradient(circle,rgba(216,0,141,.28),rgba(216,0,141,0) 68%)}.hero-art .orb-3{width:230px;height:230px;left:50%;bottom:-108px;transform:translateX(-50%);background:radial-gradient(circle,rgba(255,255,255,.075),rgba(255,255,255,0) 68%)}.hero-art .ring{position:absolute;inset:23% 19%;border-radius:30px;border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.018)}.hero-art .spark{position:absolute;width:8px;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--red),var(--pink2));box-shadow:0 0 18px rgba(255,36,63,.38)}.hero-art .spark-1{left:26%;top:29%}.hero-art .spark-2{right:24%;top:36%}.hero-art .spark-3{left:51%;bottom:23%}'
+
+          old_block = '<div class="logo-card"><div style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px" aria-hidden="true"></div></div>'
+          new_block = '<div class="logo-card"><div class="hero-art" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span><span class="orb orb-3"></span><span class="ring"></span><span class="spark spark-1"></span><span class="spark spark-2"></span><span class="spark spark-3"></span></div></div>'
+
+          if old_css not in s:
+              raise SystemExit('CSS esperado nao encontrado')
+          if old_block not in s:
+              raise SystemExit('Bloco vazio esperado nao encontrado')
+
+          s = s.replace(old_css, new_css, 1)
+          s = s.replace(old_block, new_block, 1)
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Salvar alteração
+      - name: Salvar alteracao
         shell: bash
         run: |
           git config user.name "ZEUSVENDAS site bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m "Remove logo grande da seção principal"
+          git commit -m "Melhora visual da area direita do hero"
           git push
