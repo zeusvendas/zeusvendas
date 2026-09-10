@@ -1,0 +1,39 @@
+name: Corrigir logo e WhatsApp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fix-index.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Alterar somente logo e WhatsApp
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('https://avatars.githubusercontent.com/u/327616009?v=4', 'logo-zeusvendas.webp')
+          s = s.replace("const wa='wa.me/zeusvendas';", "const wa='https://wa.me/5582996456503';")
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Salvar alterações
+        shell: bash
+        run: |
+          git config user.name "ZEUSVENDAS site bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Corrige logo e botão do WhatsApp"
+          git push
