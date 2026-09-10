@@ -1,4 +1,4 @@
-name: Corrigir logo e WhatsApp
+name: Remover logo grande do hero
 
 on:
   push:
@@ -16,24 +16,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Alterar somente logo e WhatsApp
+      - name: Remover somente a logo grande
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('https://avatars.githubusercontent.com/u/327616009?v=4', 'logo-zeusvendas.webp')
-          s = s.replace("const wa='wa.me/zeusvendas';", "const wa='https://wa.me/5582996456503';")
+          old = '<div class="logo-card"><img src="logo-zeusvendas.webp" alt="Logo ZEUSVENDAS"></div>'
+          new = '<div class="logo-card"><div style="display:block;width:100%;aspect-ratio:1/1;border-radius:20px" aria-hidden="true"></div></div>'
+          if s.count(old) != 1:
+              raise SystemExit(f'Esperava 1 logo grande, encontrei {s.count(old)}')
+          s = s.replace(old, new, 1)
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Salvar alterações
+      - name: Salvar alteração
         shell: bash
         run: |
           git config user.name "ZEUSVENDAS site bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m "Corrige logo e botão do WhatsApp"
+          git commit -m "Remove logo grande da seção principal"
           git push
